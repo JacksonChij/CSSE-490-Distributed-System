@@ -28,7 +28,8 @@ public class Client {
         String line = "";
         try{
             line = inputStream.readUTF();
-            if(line.matches("/[^\\\\]*\\.(\\w+)$/")){
+            System.out.println("Reading filename");
+            if(line.matches("^[\\w,\\s-]+\\.[A-Za-z0-9]{3}$")){
                 dataOutputStream.writeUTF("File name is valid");
                 return line;
             }
@@ -37,6 +38,35 @@ public class Client {
             e.printStackTrace();
         }
         return getFileName();
+    }
+
+    public void getFile(String filename){
+        try{
+
+            int length = Integer.parseInt(inputStream.readUTF());
+            byte[] filebyte = new byte[length];
+            FileOutputStream fileOutputStream = new FileOutputStream(filename);
+            BufferedOutputStream fileout = new BufferedOutputStream(fileOutputStream);
+            int bytes = inputStream.read(filebyte, 0, filebyte.length);
+            System.out.println("Connected to file stream");
+
+            fileout.write(filebyte, 0, bytes);
+            fileout.flush();
+            System.out.println("File read successfully");
+            dataOutputStream.writeUTF("File is valid");
+         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            try {
+                dataOutputStream.writeUTF("File is invalid");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+
     }
 
 
@@ -55,7 +85,27 @@ public class Client {
     }
 
     public static void main(String[] args){
+        Client client = new Client();
 
+        int port;
+        String hostname = "";
+        if (args.length > 2) {
+            hostname = args[1];
+            port = Integer.parseInt(args[2]);
+        }
+        else { //default
+            hostname = "192.168.1.134";
+            port = 9999;
+        }
+
+        client.startConnection(hostname, port);
+
+        System.out.println("***********************************************************");
+        System.out.println("\tConnection established, now waiting for user input...");
+
+        String filename = client.getFileName();
+        client.getFile("copy_" + filename);
+        client.stopConnection();
     }
 
 }
