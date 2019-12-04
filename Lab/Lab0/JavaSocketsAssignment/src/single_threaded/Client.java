@@ -33,7 +33,6 @@ public class Client {
         try {
             dataOutputStream.writeUTF(msg);
             String line = inputStream.readUTF();
-            System.out.println(line);
             return line;
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,7 +51,6 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public static void main(String[] args) {
