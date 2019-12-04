@@ -18,6 +18,7 @@ public class Server {
             InetAddress ip = InetAddress.getLocalHost();
             System.out.println("Serial Server on host " + ip + " is listening on port " + port);
             server = new ServerSocket(port);
+            this.port = port;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -25,10 +26,29 @@ public class Server {
     
     
     public void start() {
-    	System.out.println("Serial Server starting, listeneing on port " + this.port);
+    	System.out.println("Serial Server starting, listening on port " + this.port);
         try {
             socket = server.accept();
-            System.out.println("Now listening for incoming messages...");
+            while(true){
+                String client = socket.getRemoteSocketAddress().toString();
+                System.out.println("Received connection request from " + client);
+                System.out.println("*********************************************");
+                System.out.println("Now listening for incoming messages...");
+                inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                outputStream = new DataOutputStream(socket.getOutputStream());
+                String line = "";
+                while(!line.equals(";;;")){
+                    try{
+                        line = inputStream.readUTF();
+                        System.out.println(line);
+                        outputStream.writeUTF(line.toUpperCase());
+                    } catch (IOException e) {
+
+                    }
+                }
+                System.out.println("Client finished, now waiting to service another client...");
+                System.out.println("*********************************************");
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -40,7 +60,15 @@ public class Server {
     }
     
     public void stop() {
-        //TODO: Put code here to shut everything down
+        try {
+            inputStream.close();
+            outputStream.close();
+            server.close();
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 	
     public static void main(String args[]) {
